@@ -6,11 +6,26 @@ from google.genai import types
 def generate_video_assets():
     print("🤖 Prompting Gemini for script and B-roll keywords...")
     
+    # Get user input for the tutorial topic
+    topic = input("Please enter the tutorial topic (e.g., 'Python programming', 'Machine Learning basics'): ")
+    
+    # Get user input for video duration
+    while True:
+        try:
+            duration_str = input("Please enter the desired video duration in seconds (e.g., '15', '30'): ")
+            duration = int(duration_str)
+            if duration <= 0:
+                print("Duration must be a positive number. Please try again.")
+            else:
+                break
+        except ValueError:
+            print("Invalid input. Please enter a whole number for the duration.")
+
     # Initialize the standard Google GenAI client
     client = genai.Client()
     
-    prompt = """
-    Create a short, engaging 15-second motivational or educational script about Python programming.
+    prompt = f"""
+    Create a short, engaging {duration}-second motivational or educational script about {topic}.
     
     You must return your response as a valid JSON object with exactly two keys:
     1. 'narration_text': The spoken script text for the voiceover.
