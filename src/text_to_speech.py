@@ -10,5 +10,5 @@ def convert_text_to_audio(text, output_path):
 
 if __name__ == "__main__":
     test_text = "Testing our free text to speech engine."
-    test_output = "data/audio/test_voiceover.mp3"
+    test_output = "data/audio/narration.mp3"
     convert_text_to_audio(test_text, test_output)
