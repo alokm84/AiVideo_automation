@@ -1,1 +1,1 @@
-gTTS
+pip install -r requirements.txt
