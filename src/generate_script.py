@@ -1,31 +1,52 @@
 import os
+import json
 from google import genai
+from google.genai import types
 
-def generate_video_script(topic: str, output_path: str):
-    """Generates a short video script using Gemini 2.5 Flash."""
-    # Ensure output directory exists
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+def generate_video_assets():
+    print("🤖 Prompting Gemini for script and B-roll keywords...")
     
-    # Initialize the standard client (automatically picks up GEMINI_API_KEY from .env)
+    # Initialize the standard Google GenAI client
     client = genai.Client()
     
-    prompt = f"Write a highly engaging, 30-second video voiceover script about: {topic}. Do not include stage directions or brackets, just the spoken text."
+    prompt = """
+    Create a short, engaging 15-second motivational or educational script about Python programming.
     
-    print(f"🤖 Asking Gemini to write a script about: {topic}...")
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=prompt,
-    )
+    You must return your response as a valid JSON object with exactly two keys:
+    1. 'narration_text': The spoken script text for the voiceover.
+    2. 'search_keywords': A list of 3-4 highly specific visual keywords (e.g., 'coding laptop close up', 'abstract digital data', 'programmer working typing') that we can use to search for free B-roll stock video footage.
     
-    script_text = response.text
-    
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(script_text)
+    Do not include any markdown formatting like ```json or ``` in your response. Return pure text JSON.
+    """
+
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
         
-    print(f"✅ Script saved successfully at: {output_path}")
-    return script_text
+        # Clean clean-up text if markdown leaked in
+        clean_text = response.text.strip().lstrip("```json").rstrip("```").strip()
+        data = json.loads(clean_text)
+        
+        # Ensure directories exist
+        os.makedirs("data/text", exist_ok=True)
+        
+        # Save narration text for the voice generator
+        with open("data/text/script.txt", "w") as f:
+            f.write(data["narration_text"])
+            
+        # Save B-roll keywords for our asset downloader
+        with open("data/text/keywords.json", "w") as f:
+            json.dump(data["search_keywords"], f, indent=4)
+            
+        print("✅ Successfully generated script and B-roll keywords!")
+        print(f"🔑 Target Keywords: {data['search_keywords']}")
+        return True
+
+    except Exception as e:
+        print(f"❌ Failed to generate script: {e}")
+        return False
 
 if __name__ == "__main__":
-    test_topic = "Why Python is the king of automation"
-    test_output = "data/scripts/test_script.txt"
-    generate_video_script(test_topic, test_output)
+    generate_video_assets()
