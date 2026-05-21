@@ -1,0 +1,18 @@
+import os
+from dotenv import load_dotenv
+
+# Load the keys from the .env file into system memory
+load_dotenv()
+
+# Fetch the key
+api_key = os.getenv("GEMINI_API_KEY")
+
+print("─── Environment Variable Test ───")
+if api_key:
+    # Shows just the first 4 and last 4 characters so your key stays hidden
+    masked_key = f"{api_key[:4]}...{api_key[-4:]}"
+    print(f"✅ Success! .env file found and loaded.")
+    print(f"🔑 Loaded Key: {masked_key}")
+else:
+    print("❌ Error: GEMINI_API_KEY not found!")
+    print("💡 Check: Is your file named exactly '.env' and placed in the root folder?")
